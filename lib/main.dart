@@ -15,12 +15,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Dino Run',
+      title: 'Spot Run',
       theme: ThemeData(
-        fontFamily: 'Audiowide',
+        fontFamily: 'VT323',
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Dino Run'),
+      home: MyHomePage(title: 'Spot Run'),
     );
   }
 }

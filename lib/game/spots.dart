@@ -257,8 +257,11 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<Game> {
   Manager manager = Manager();
   bool info;
   Timer _timer;
+  Timer _pointTimer;
 
   double posX, posY;
+  static int previous;
+
 
   // ==============================
 
@@ -273,6 +276,13 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<Game> {
     _timer = Timer(1, callback: () {
       gameRef.removeWidgetOverlay('fault2');
     });
+
+    _pointTimer = Timer(1, callback: () {
+      gameRef.removeWidgetOverlay('pointspop');
+    });
+
+    previous = 0;
+
   }
 
 
@@ -280,12 +290,20 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<Game> {
     _random = Random();
     int dice = _random.nextInt(100);
     Sprite sp;
-    sp = spotDetails.keys.elementAt(_random.nextInt(spotDetails.length));
-    // Wahrscheinlichkeitsverteilung
-    if(spotDetails[sp].isBad && dice > 40){
-      return getSprite();
+    int index = _random.nextInt(spotDetails.length);
+
+    if(index != previous) {
+      sp = spotDetails.keys.elementAt(index);
+
+      // Wahrscheinlichkeitsverteilung
+      if (spotDetails[sp].isBad && dice > 40) {
+        return getSprite();
+      } else {
+        previous = index;
+        return sp;
+      }
     } else {
-      return sp;
+      return getSprite();
     }
 }
 
@@ -306,10 +324,6 @@ bool getInfo(){
     return info;
 }
 
-void setSprite(Sprite s){
-    //previous = s;
-}
-
 
 static bool isBad(Sprite s){
     spotData = spotDetails[s];
@@ -324,22 +338,40 @@ static bool isBad(Sprite s){
     this.x -= 130 * t;
 
 
-    // Spiel wird ab 40 Sekunden schneller
-    //if(gameRef.time < 40){
-    //  this.x -= 160 * t;
-    //}
+     //Spiel wird ab Restzeit 40 Sekunden schneller
+    if(gameRef.time < 40){
+      this.x -= 160 * t;
+
+    }
     _timer.update(t);
+    _pointTimer.update(t);
+
+    if(this.x < -30 && this.info == true){
+      gameRef.markToRemove(this);
+      gameRef.lifePoints.value -=1;
+      //gameRef.time -=10;
+      print("remove");
+
+    }
+
   }
 
   @override
   void resize(Size size) {
     super.resize(size);
-    this.x = size.width + _random.nextInt(300) + 50;
+    this.x = size.width + _random.nextInt(300) + _random.nextInt(50);
     this.y = 100 + _random.nextInt(size.height.toInt()-200).toDouble();
 
-
+    // Verhinderung von Flecken-Überlappung
+    gameRef.components.whereType<Spot>().forEach((spot) {
+      if(this.distance(spot) < 50){
+        this.x = size.width + _random.nextInt(300) + _random.nextInt(50);
+        this.y = 100 + _random.nextInt(size.height.toInt()-200).toDouble();
+      }
+    });
   }
 
+  // Tippen auf Flecken
   @override
   void onTapDown(TapDownDetails details) {
     super.onTapDown(details);
@@ -350,11 +382,34 @@ static bool isBad(Sprite s){
       print(this.info);
       gameRef.markToRemove(this);
       gameRef.score += 1;
+
+
+      //_pointTimer.start();
+      //gameRef.addWidgetOverlay('pointspop',
+      //    Positioned(
+      //        top: posY,
+      //        left: posX -200,
+      //        child: Card(
+      //          color: Colors.white.withOpacity(0.1),
+      //          child: Padding(
+      //            padding: EdgeInsets.symmetric(
+      //              horizontal: 20.0,
+      //              vertical: 20.0,
+      //            ),
+      //            child: Text('+1',
+      //              style: TextStyle(
+      //                color: Colors.black,
+      //                fontSize: 40.0,
+      //              ),),
+      //          ),
+      //        ))
+      //);
+
     } else if(this.info == false){
       //gameRef.addWidgetOverlay('fault', _buildWarning());
       _timer.start();
       gameRef.addWidgetOverlay('fault2',
-      Positioned(
+          Positioned(
           top: posY,
           left: posX -200,
           child: Card(
@@ -368,7 +423,8 @@ static bool isBad(Sprite s){
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20.0,
-                ),),
+                ),
+                ),
           ),
       ))
       );

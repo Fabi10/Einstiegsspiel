@@ -13,6 +13,7 @@ class Manager extends Component with HasGameRef<Game> {
   Timer _timer;
   Random _random;
   SpotData data;
+  double _spawnLevel;
 
   Manager() : super() {
     // {this.sprite}
@@ -20,6 +21,7 @@ class Manager extends Component with HasGameRef<Game> {
       spawnRandomSpots();
     });
     _random = Random();
+    _spawnLevel = 0;
   }
 
   void spawnRandomSpots() {
@@ -31,13 +33,11 @@ class Manager extends Component with HasGameRef<Game> {
       height: data.textureHeight / 3,
       isBad: Spot.isBad(s),
     );
-    //res.setSprite(s);
+
     res.setInfo(Spot.isBad(s));
 
     gameRef.addLater(res);
 
-    //res.x = gameRef.size.width + _random.nextInt(300) + 50;
-    //res.y = _random.nextInt(500).toDouble();
   }
 
   @override
@@ -52,5 +52,7 @@ class Manager extends Component with HasGameRef<Game> {
   @override
   void update(double t) {
     _timer.update(t);
+
+
   }
 }

@@ -5,6 +5,12 @@ import 'package:flame/animation.dart';
 import 'package:flame/components/component.dart';
 import 'package:flame/components/mixins/has_game_ref.dart';
 import 'package:flame/components/mixins/tapable.dart';
+import 'package:flame/components/particle_component.dart';
+import 'package:flame/particle.dart';
+import 'package:flame/particles/accelerated_particle.dart';
+import 'package:flame/particles/circle_particle.dart';
+import 'package:flame/particles/moving_particle.dart';
+import 'package:flame/position.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame/time.dart';
 import 'package:flutter/cupertino.dart';
@@ -31,7 +37,7 @@ class SpotData {
 }
 
 
-class Spot extends SpriteComponent with Tapable, HasGameRef<Game> {
+class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame> {
 
 
 
@@ -254,13 +260,18 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<Game> {
   // ATTRIBUTE
   static Random _random;
   static SpotData spotData;
+  static int previous;
+  static int index = 0;
+  
   Manager manager = Manager();
   bool info;
   Timer _timer;
   Timer _pointTimer;
 
   double posX, posY;
-  static int previous;
+  Random random;
+
+  
 
 
   // ==============================
@@ -310,10 +321,12 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<Game> {
   static Sprite getSp(){
     Sprite s;
     for(int i = 0; i < spotDetails.length; i++){
-      s = spotDetails.keys.elementAt(i);
+      s = spotDetails.keys.elementAt(index);
+      index + 1 ;
       return s;
     }
-    return s;
+    index = 0;
+    return getSp();
   }
 
 void setInfo(bool data){
@@ -337,16 +350,16 @@ static bool isBad(Sprite s){
     super.update(t);
     this.x -= 130 * t;
 
-
      //Spiel wird ab Restzeit 40 Sekunden schneller
-    if(gameRef.time < 40){
+    if(gameRef.time <= 40){
       this.x -= 160 * t;
+      gameRef.parallaxComponent.baseSpeed = Offset(290,0);
 
     }
     _timer.update(t);
     _pointTimer.update(t);
 
-    if(this.x < -30 && this.info == true){
+    if(this.x < 0 - this.width && this.info == true){
       gameRef.markToRemove(this);
       gameRef.lifePoints.value -=1;
       //gameRef.time -=10;
@@ -357,6 +370,11 @@ static bool isBad(Sprite s){
   }
 
   @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+  }
+
+  @override
   void resize(Size size) {
     super.resize(size);
     this.x = size.width + _random.nextInt(300) + _random.nextInt(50);
@@ -364,11 +382,15 @@ static bool isBad(Sprite s){
 
     // Verhinderung von Flecken-Überlappung
     gameRef.components.whereType<Spot>().forEach((spot) {
-      if(this.distance(spot) < 50){
+      if(this.distance(spot) < this.width + 20){
         this.x = size.width + _random.nextInt(300) + _random.nextInt(50);
         this.y = 100 + _random.nextInt(size.height.toInt()-200).toDouble();
       }
     });
+  }
+
+  double getRandom(){
+    return (_random.nextDouble() - _random.nextDouble());
   }
 
   // Tippen auf Flecken
@@ -382,6 +404,22 @@ static bool isBad(Sprite s){
       print(this.info);
       gameRef.markToRemove(this);
       gameRef.score += 1;
+
+      final particleComponent = ParticleComponent(
+          particle: Particle.generate(
+              count: 20,
+              lifespan: 0.14,
+              generator: (i) => AcceleratedParticle(
+                  acceleration: Offset(getRandom(), getRandom()) * 550,
+                  speed: Offset(getRandom(), getRandom()) * 500,
+                  position: Offset(posX,posY),
+                  child: CircleParticle(
+                    radius: 1.6,
+                    paint: Paint()..color = Color(0XFF5b3a29),
+                  ))));
+
+      gameRef.add(particleComponent);
+
 
 
       //_pointTimer.start();
@@ -413,6 +451,9 @@ static bool isBad(Sprite s){
           top: posY,
           left: posX -200,
           child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
+            ),
             color: Colors.black.withOpacity(0.5),
             child: Padding(
               padding: EdgeInsets.symmetric(
@@ -422,7 +463,7 @@ static bool isBad(Sprite s){
                 child: Text('Dieser Fleck ist harmlos!',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20.0,
+                  fontSize: 22.0,
                 ),
                 ),
           ),

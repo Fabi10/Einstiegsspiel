@@ -8,7 +8,7 @@ import 'package:flame/time.dart';
 import 'package:tutorial_game/game/game.dart';
 import 'package:tutorial_game/game/spots.dart';
 
-class Manager extends Component with HasGameRef<Game> {
+class Manager extends Component with HasGameRef<SpotGame> {
   Sprite s;
   Timer _timer;
   Random _random;

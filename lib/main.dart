@@ -2,6 +2,7 @@
 import 'package:flame/flame.dart';
 import 'package:flutter/material.dart';
 import 'package:tutorial_game/game/game.dart';
+import 'package:tutorial_game/screens/main_menu.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,11 +21,13 @@ class MyApp extends StatelessWidget {
         fontFamily: 'VT323',
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Spot Run'),
+      home: MainMenu(), // MyHomePage(title: 'Spot Run'),
     );
   }
 }
 
+
+// FÄLLT WEG
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
@@ -35,12 +38,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
- Game game;
+ SpotGame game;
 
  @override
   void initState() {
     super.initState();
-    game = Game();
+    game = SpotGame();
 
   }
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:js';
 import 'dart:math';
 import 'dart:ui';
 import 'package:flame/components/component.dart';
@@ -7,19 +8,16 @@ import 'package:flame/components/parallax_component.dart';
 import 'package:flame/components/text_component.dart';
 import 'package:flame/game.dart';
 import 'package:flame/position.dart';
-import 'package:flame/sprite.dart';
 import 'package:flame/text_config.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:tutorial_game/game/enemy.dart';
-import 'package:tutorial_game/game/enemy_manager.dart';
 import 'package:tutorial_game/game/spot_manager.dart';
 import 'package:tutorial_game/game/spots.dart';
-import 'dino.dart';
+import 'package:tutorial_game/screens/gameover_menu.dart';
+import 'package:tutorial_game/screens/main_menu.dart';
 
-// DINO-KLASSE
-class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
-  Dino _dino;
+
+class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
 
   SpriteComponent detector;
 
@@ -46,10 +44,10 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
 
   // = =======================================
 
-  Game() {
+  SpotGame() {
     lifePoints = ValueNotifier(3);
 
-    // Hauthintergund - evt mit mehreren Ebenen
+    // Hauthintergund - 2 Bilder übereinander
     parallaxComponent = ParallaxComponent([
       ParallaxImage('background.png'),
       ParallaxImage('layer.png'),
@@ -60,8 +58,6 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
 
     add(parallaxComponent);
 
-    _dino = Dino();
-    //add(_dino);
 
     score = 0;
     _scoreText = TextComponent("Punkte: $score ", //+ score.toString()
@@ -93,6 +89,13 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
 
     Manager _manager = Manager();
     add(_manager);
+
+  }
+
+  @override
+  void onTapDown(int pointerId, TapDownDetails details) {
+    super.onTapDown(pointerId, details);
+
   }
 
   @override
@@ -108,9 +111,7 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
   @override
   void update(double t) {
     super.update(t);
-    //score += (60 * t).toInt();
     _timeDisplay.text = time.toString();
-    //_scoreText.text = score.toString();
     _scoreText.text = "Punkte: $score";
 
     // Gameover bei Lebenspunkte = 0
@@ -118,11 +119,8 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
       gameOver();
     }
 
-    if(time <= 40){
-      parallaxComponent.baseSpeed = Offset(160, 0);
-
-    }
   }
+
 
   // Timer startet von 90 Sekunden
   void startTimer(int value) {
@@ -155,6 +153,7 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
     }
   }
 
+  // Header mit Pause Button und Lebenspunkte
   Widget _buildHeader() {
     return Card(
       //shape: RoundedRectangleBorder(
@@ -207,7 +206,6 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
                 ])
           ,
       ),
-
     );
 
   }
@@ -216,7 +214,6 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
     pauseEngine();
     if (_timer.isActive) {
       _timer.cancel();
-      //_spotTimer.cancel();
     }
     // Pause-Bildschirm Widget
     addWidgetOverlay('PauseMenu', _buildPauseMenu());
@@ -321,10 +318,33 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
 
   void gameOver() {
     pauseEngine();
-    addWidgetOverlay('GameoverMenu', _gameoverMenu());
+    addWidgetOverlay('GameoverMenu', GameOver(
+        score: score,
+        onRestartPressed: reset)); //_gameoverMenu()
   }
 
+
+  // FÄLLT WEG
   Widget _gameoverMenu() {
+
+
+    //Dynamischer Ergebnistext je nach Anzahl erreichter Punkte
+    String resultText = " ";
+    if(score == 0){
+      resultText = 'Oh, du hast keine auffälligen Hautflecken erkannt. Hattest du Schwierigkeiten dabei? '
+          'Schaue dir jetzt alles etwas genauer in der Hautkrebs-Info-App an, oder starte das Spiel erneut! ';
+    } else if(score == 1){
+      resultText = 'Oh, du hast nur eine verdächtige Hautveränderung entdeckt! Da wurden aber einige übersehen.'
+          ' Schaue dir jetzt alles etwas genauer in der Hautkrebs-Info-App an, oder starte das Spiel erneut! ';
+    } else if(score >=5 && score <= 6) {
+      resultText = 'Gar nicht so schlecht! Du hast $score verdächtige Hautflecken entdeckt.'
+          ' Schaue dir jetzt die Info-App rund um das Thema Hautkrebs an';
+    } else if(score > 6 && score <=11) {
+      resultText = 'Sehr gut! Du hast $score verdächtige Hautflecken entdeckt.'
+          ' Schaue dir jetzt die Info-App rund um das Thema Hautkrebs an. ';
+    }
+
+
     return Center(
       child: Card(
           shape: RoundedRectangleBorder(
@@ -341,14 +361,14 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Gameover',
+                  'Game Over',
                   style: TextStyle(fontSize: 70.0, color: Colors.white),
                 ),
                 Text("   ",
                   style: TextStyle(fontSize: 30.0, color: Colors.white),
                 ),
                 Text(
-                  'Du hast $score verdächtige Flecken richtig erkannt. Gar nicht so schlecht!',
+                  resultText,
                   style: TextStyle(fontSize: 30.0, color: Colors.white),
                 ),
                 Text("   ",
@@ -358,6 +378,7 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // Neustart
                     Container(
                       width: 250,
                       height: 150,
@@ -376,6 +397,8 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
                           ),
                           child:
                           Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 'Neustart',
@@ -398,6 +421,7 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
                         ),
                       ),
                     ),
+                    // Info-App
                     Container(
                       width: 250,
                       height: 150,
@@ -415,6 +439,8 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
                           ),
                           child:
                           Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 'Zur Info-App',
@@ -436,6 +462,40 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
                         ),
                       ),
                     ),
+                    // Hauptmenu
+                    Container(
+                      width: 250,
+                      height: 150,
+                      child:
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        color: Colors.white.withOpacity(0.8),
+                        child:
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 40.0,
+                            vertical: 20.0,
+                          ),
+                          child:
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ElevatedButton(
+                                child: Text('Hauptmenü',
+                                    style: TextStyle(fontSize: 30.0, color: Colors.black),
+                                ),
+                                onPressed: () {
+                                    // Zur App
+                                  },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -443,6 +503,7 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
           )),
     );
   }
+
 
   // NEUSTART
   void reset() {
@@ -455,12 +516,7 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
 
     this.lifePoints.value = 3;
 
-    //_enemyManager.reset();
 
-    // Alle Enemy-Komponenten werden gelöscht vor dem Restart
-    components.whereType<Enemy>().forEach((enemy) {
-      this.markToRemove(enemy);
-    });
 
     // Flecken löschen
     components.whereType<Spot>().forEach((spot) {
@@ -468,5 +524,10 @@ class Game extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
     });
 
     parallaxComponent.baseSpeed = Offset(130, 0);
+    removeWidgetOverlay('fault2');
+
+    removeWidgetOverlay('GameoverMenu');
+    resumeEngine();
+
   }
 }

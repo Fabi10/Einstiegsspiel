@@ -45,7 +45,7 @@ class GameOver extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
           ),
-          color: Color(0xFF2D8064).withOpacity(0.8),//Color(0xFF83AA74),
+          color: Color(0xFF2D8064), //.withOpacity(0.8),//Color(0xFF83AA74),
           child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: 100.0,

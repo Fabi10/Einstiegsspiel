@@ -19,9 +19,7 @@ import 'package:flutter/rendering.dart';
 import 'package:tutorial_game/game/game.dart';
 import 'package:tutorial_game/game/spot_manager.dart';
 
-
 class SpotData {
-
   final double textureWidth;
   final double textureHeight;
   final int speed; // Jeder gegner andere Geschwindigkeit
@@ -33,21 +31,15 @@ class SpotData {
     @required this.speed,
     @required this.isBad,
   });
-
 }
 
-
 class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame> {
-
-
-
   static final Map<Sprite, SpotData> spotDetails = {
     Sprite('flecken_gut/g1.png'): SpotData(
       textureWidth: 327,
       textureHeight: 311,
       speed: 200,
       isBad: false,
-
     ),
     Sprite('flecken_gut/g2.png'): SpotData(
       textureWidth: 221,
@@ -254,7 +246,6 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame> {
       speed: 200,
       isBad: true,
     ),
-
   };
 
   // ATTRIBUTE
@@ -262,7 +253,7 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame> {
   static SpotData spotData;
   static int previous;
   static int index = 0;
-  
+
   Manager manager = Manager();
   bool info;
   Timer _timer;
@@ -270,9 +261,7 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame> {
 
   double posX, posY;
   Random random;
-
-  
-
+  bool _tapwrong;
 
   // ==============================
 
@@ -281,10 +270,9 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame> {
     double width,
     double height,
     bool isBad,
-    }) : super.fromSprite(width, height, sprite) {
-
+  }) : super.fromSprite(width, height, sprite) {
     isBad = false;
-    _timer = Timer(1, callback: () {
+    _timer = Timer(2, callback: () {
       gameRef.removeWidgetOverlay('fault2');
     });
 
@@ -293,17 +281,16 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame> {
     });
 
     previous = 0;
-
+    _tapwrong = false;
   }
 
-
-  static Sprite getSprite(){
+  static Sprite getSprite() {
     _random = Random();
     int dice = _random.nextInt(100);
     Sprite sp;
     int index = _random.nextInt(spotDetails.length);
 
-    if(index != previous) {
+    if (index != previous) {
       sp = spotDetails.keys.elementAt(index);
 
       // Wahrscheinlichkeitsverteilung
@@ -316,57 +303,71 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame> {
     } else {
       return getSprite();
     }
-}
+  }
 
-  static Sprite getSp(){
+  static Sprite getSp() {
     Sprite s;
-    for(int i = 0; i < spotDetails.length; i++){
-      s = spotDetails.keys.elementAt(index);
-      index + 1 ;
-      return s;
-    }
+    s = spotDetails.keys.elementAt(index);
+    index += 1;
+    return s;
+
     index = 0;
     return getSp();
   }
 
-void setInfo(bool data){
+  void setInfo(bool data) {
     this.info = data;
-}
+  }
 
-bool getInfo(){
+  bool getInfo() {
     return info;
-}
+  }
 
-
-static bool isBad(Sprite s){
+  static bool isBad(Sprite s) {
     spotData = spotDetails[s];
-  return spotData.isBad;
-
-}
-
+    return spotData.isBad;
+  }
 
   @override
   void update(double t) {
     super.update(t);
     this.x -= 130 * t;
 
-     //Spiel wird ab Restzeit 40 Sekunden schneller
-    if(gameRef.time <= 40){
+    //Spiel wird ab Restzeit 40 Sekunden schneller
+    if (gameRef.time <= 40) {
       this.x -= 160 * t;
-      gameRef.parallaxComponent.baseSpeed = Offset(290,0);
-
+      gameRef.parallaxComponent.baseSpeed = Offset(290, 0);
     }
     _timer.update(t);
     _pointTimer.update(t);
 
-    if(this.x < 0 - this.width && this.info == true){
+    if (this.x < 0 - this.width && this.info == true) {
       gameRef.markToRemove(this);
-      gameRef.lifePoints.value -=1;
+      gameRef.lifePoints.value -= 1;
       //gameRef.time -=10;
       print("remove");
-
     }
 
+    if (_tapwrong == true) {
+      gameRef.addWidgetOverlay(
+          'wrongtap',
+          Positioned(
+            width: gameRef.size.width,
+            height: gameRef.size.height,
+            top: 100,
+            bottom: 50,
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              color: Color(0xFF418D87),
+              child: Image(
+                image: AssetImage('assets/images/lupe2.png'),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ));
+    }
   }
 
   @override
@@ -378,18 +379,18 @@ static bool isBad(Sprite s){
   void resize(Size size) {
     super.resize(size);
     this.x = size.width + _random.nextInt(300) + _random.nextInt(50);
-    this.y = 100 + _random.nextInt(size.height.toInt()-200).toDouble();
+    this.y = 100 + _random.nextInt(size.height.toInt() - 200).toDouble();
 
     // Verhinderung von Flecken-Überlappung
     gameRef.components.whereType<Spot>().forEach((spot) {
-      if(this.distance(spot) < this.width + 20){
+      if (this.distance(spot) < this.width + 20) {
         this.x = size.width + _random.nextInt(300) + _random.nextInt(50);
-        this.y = 100 + _random.nextInt(size.height.toInt()-200).toDouble();
+        this.y = 100 + _random.nextInt(size.height.toInt() - 200).toDouble();
       }
     });
   }
 
-  double getRandom(){
+  double getRandom() {
     return (_random.nextDouble() - _random.nextDouble());
   }
 
@@ -400,7 +401,7 @@ static bool isBad(Sprite s){
     posX = details.globalPosition.dx;
     posY = details.globalPosition.dy;
 
-    if(this.info == true){
+    if (this.info == true) {
       print(this.info);
       gameRef.markToRemove(this);
       gameRef.score += 1;
@@ -412,15 +413,13 @@ static bool isBad(Sprite s){
               generator: (i) => AcceleratedParticle(
                   acceleration: Offset(getRandom(), getRandom()) * 550,
                   speed: Offset(getRandom(), getRandom()) * 500,
-                  position: Offset(posX,posY),
+                  position: Offset(posX, posY),
                   child: CircleParticle(
                     radius: 1.6,
                     paint: Paint()..color = Color(0XFF5b3a29),
                   ))));
 
       gameRef.add(particleComponent);
-
-
 
       //_pointTimer.start();
       //gameRef.addWidgetOverlay('pointspop',
@@ -443,71 +442,70 @@ static bool isBad(Sprite s){
       //        ))
       //);
 
-    } else if(this.info == false){
+    } else if (this.info == false) {
       //gameRef.addWidgetOverlay('fault', _buildWarning());
       _timer.start();
-      gameRef.addWidgetOverlay('fault2',
-          Positioned(
-          top: posY,
-          left: posX -200,
-          child: Card(
+      gameRef.addWidgetOverlay('fault2', _fault());
+    }
+  }
+
+  Widget _fault() {
+    return Positioned(
+        top: posY,
+        left: posX - 200,
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          color: Colors.black.withOpacity(0.5),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 20.0,
+            ),
+            child: Text(
+              'Dieser Fleck ist harmlos!',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22.0,
+              ),
+            ),
+          ),
+        ));
+  }
+
+  Widget _faultOverlay() {
+    return Positioned(
+      width: gameRef.size.width,
+      height: gameRef.size.height,
+      top: 100,
+      bottom: 50,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Card(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20.0),
             ),
-            color: Colors.black.withOpacity(0.5),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 20.0,
-              ),
-                child: Text('Dieser Fleck ist harmlos!',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22.0,
-                ),
-                ),
+            color: Color(0xFF83AA74),
+            child: Image(
+              image: AssetImage('assets/images/Lupe.png'),
+              fit: BoxFit.cover,
+            ),
           ),
-      ))
-      );
-
-    }
-
-  }
-
-
-
-}
-
-Widget _buildWarning() {
-  return Center(
-    child: Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      color: Colors.black.withOpacity(0.5),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: 100.0,
-          vertical: 50.0,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Dieser Fleck ist harmlos!',
+          Positioned(
+            top: 160,
+            left: 290,
+            child: Text(
+              'Dieser Fleck \nist harmlos!',
               style: TextStyle(
-                fontSize: 30.0,
-                color: Colors.white,
+                fontSize: 60.0,
+                color: Colors.black,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    ),
-  );
-
+    );
+  }
 }
-
-
-

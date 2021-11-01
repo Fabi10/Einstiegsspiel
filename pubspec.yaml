@@ -32,6 +32,7 @@ dependencies:
   pausable_timer: ^1.0.0+1
   #vector_math: ^2.1.1
   video_player: ^2.2.5
+  url_launcher: ^6.0.12
 
 dev_dependencies:
   flutter_test:
@@ -52,8 +53,8 @@ flutter:
   assets:
     - assets/audio/
     - assets/images/
-    - assets/images/flecken_gut/
-    - assets/images/flecken_böse/
+    - assets/images/flecken_positive/
+    - assets/images/flecken_negative/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
@@ -70,13 +71,17 @@ flutter:
     - family: Audiowide
       fonts:
         - asset: assets/fonts/Audiowide-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
+
     - family: VT323
       fonts:
         - asset: assets/fonts/VT323-Regular.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
-  #
+
+    - family: OpenSans
+      fonts:
+        #- asset: assets/fonts/OpenSans-Bold.ttf
+        - asset: assets/fonts/OpenSans-Regular.ttf
+
+
+
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

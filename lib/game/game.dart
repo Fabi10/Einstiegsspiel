@@ -10,11 +10,13 @@ import 'package:flame/game.dart';
 import 'package:flame/position.dart';
 import 'package:flame/text_config.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tutorial_game/game/spot_manager.dart';
 import 'package:tutorial_game/game/spots.dart';
 import 'package:tutorial_game/screens/gameover_menu.dart';
 import 'package:tutorial_game/screens/main_menu.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 
 class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
@@ -39,6 +41,8 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
 
   // Leben
   ValueNotifier<int> lifePoints;
+  bool _isActive;
+  bool timeZero;
 
   // ==================================================
 
@@ -52,8 +56,9 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
       ParallaxImage('background.png'),
       ParallaxImage('layer.png'),
     ],
-        // 100 = x-Richtung; 0 = y-Richtung
-        baseSpeed: Offset(130, 0));
+        // Geschwindigkeit in x- und y-Richtung
+        baseSpeed: Offset(130, 0)
+    );
     //layerDelta: Offset(20, 0));
 
     add(parallaxComponent);
@@ -67,7 +72,7 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
           fontSize: 55.0,
         ));
 
-    _timeDisplay = TextComponent(time.toString(),
+    _timeDisplay = TextComponent("$time", //.toString()
         config: TextConfig(
           fontFamily: 'VT323',
           color: Colors.black,
@@ -90,7 +95,12 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
     Manager _manager = Manager();
     add(_manager);
 
+    _isActive = true;
+    timeZero = false;
+
   }
+
+  get https => null;
 
   @override
   void onTapDown(int pointerId, TapDownDetails details) {
@@ -102,16 +112,16 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
   void resize(Size size) {
     super.resize(size);
     _timeDisplay.setByPosition(
-        Position(((size.width / 2) - (_timeDisplay.width * 4)), 5));
+        Position(((size.width / 2) - (_timeDisplay.width * 4)), 15));
 
     // NEU
-    _scoreText.setByPosition(Position(((size.width / 2)), 10));
+    _scoreText.setByPosition(Position(((size.width / 2)), 22));
   }
 
   @override
   void update(double t) {
     super.update(t);
-    _timeDisplay.text = time.toString();
+    _timeDisplay.text = '$time';
     _scoreText.text = "Punkte: $score";
 
     // Gameover bei Lebenspunkte = 0
@@ -130,6 +140,7 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
         time -= 1;
       } else {
         _timer.cancel();
+        timeZero = true;
         gameOver();
       }
     });
@@ -173,8 +184,12 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
                 children: [
                   IconButton(
                     onPressed: () {
-                      // Aufruf Pause Bildschirm
-                      pauseGame();
+                       //Aufruf Pause Bildschirm
+                      if(_isActive == true){
+                        pauseGame();
+                      } else if(_isActive == false) {
+                        null;
+                      }
                     },
                     icon: Icon(
                       Icons.pause_circle_outline,
@@ -186,13 +201,13 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
 
                   //Lebenspunkte
                   ValueListenableBuilder(
-                    valueListenable: this.lifePoints,
+                    valueListenable: this.lifePoints, //ValueNotifier
                     builder: (BuildContext context, value, Widget child) {
                       List<Widget> list = <Widget>[];
                       for (int i = 0; i < 3; ++i) {
                         list.add(
                           Icon(
-                            (i < value) ? Icons.favorite_outlined : Icons.favorite_border,
+                            (i < value) ? Icons.favorite : Icons.favorite_border,
                             color: Color(0xFF2D8064),
                             size: 40.0,
                           ),
@@ -216,6 +231,8 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
       _timer.cancel();
     }
     // Pause-Bildschirm Widget
+    removeWidgetOverlay('fault2');
+    removeWidgetOverlay('posFeedback');
     addWidgetOverlay('PauseMenu', _buildPauseMenu());
   }
 
@@ -225,8 +242,8 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20.0),
         ),
-        color: Color(0xFF2D8064), //.withOpacity(0.8),
-        //Color(0xFF2D8064).withOpacity(0.5),
+        color: Color(0xFF2D8064).withOpacity(0.8),
+        //Color(0xFF2D8064).withOpacity(0.5),q
         // Colors.black.withOpacity(0.5),
         child: Padding(
           padding: EdgeInsets.symmetric(
@@ -288,12 +305,10 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
                     ),
                   ),
                   IconButton(
-                    onPressed: () {
-                      // Zur App
-                    },
+                    onPressed: _launchURL,
                     iconSize: 50.0,
                     icon: Icon(
-                      Icons.info,
+                      Icons.info_outline,
                       color: Colors.white,
                       size: 50.0,
                     ),
@@ -318,9 +333,20 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
 
   void gameOver() {
     pauseEngine();
+    _isActive = false;
+    _timer.cancel();
     addWidgetOverlay('GameoverMenu', GameOver(
         score: score,
-        onRestartPressed: reset)); //_gameoverMenu()
+        onRestartPressed: reset,
+        timeZero: timeZero)
+    ); //_gameoverMenu()
+
+  }
+
+  void _launchURL() async {
+    await canLaunch('https://lab.ise.uni-luebeck.de/tabiri/#/home')
+        ? await launch('https://lab.ise.uni-luebeck.de/tabiri/#/home')
+        : throw 'Could not launch $https://lab.ise.uni-luebeck.de/tabiri/#/home';
   }
 
 
@@ -334,8 +360,7 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
     startTimer(time);
 
     this.lifePoints.value = 3;
-
-
+    timeZero = false;
 
     // Flecken löschen
     components.whereType<Spot>().forEach((spot) {
@@ -344,9 +369,11 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
 
     parallaxComponent.baseSpeed = Offset(130, 0);
     removeWidgetOverlay('fault2');
-
+    removeWidgetOverlay('posFeedback');
     removeWidgetOverlay('GameoverMenu');
+
     resumeEngine();
+    _isActive = true;
 
   }
 }

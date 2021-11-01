@@ -1,6 +1,5 @@
-import 'dart:math';
-import 'dart:ui';
 
+import 'dart:ui';
 import 'package:flame/components/component.dart';
 import 'package:flame/components/mixins/has_game_ref.dart';
 import 'package:flame/sprite.dart';
@@ -11,17 +10,13 @@ import 'package:tutorial_game/game/spots.dart';
 class Manager extends Component with HasGameRef<SpotGame> {
   Sprite s;
   Timer _timer;
-  Random _random;
   SpotData data;
-  double _spawnLevel;
 
   Manager() : super() {
     // {this.sprite}
     _timer = Timer(1.0, repeat: true, callback: () {
       spawnRandomSpots();
     });
-    _random = Random();
-    _spawnLevel = 0;
   }
 
   void spawnRandomSpots() {
@@ -31,13 +26,10 @@ class Manager extends Component with HasGameRef<SpotGame> {
       sprite: s, // sprite
       width: data.textureWidth / 3,
       height: data.textureHeight / 3,
-      isBad: Spot.isBad(s),
+      isNegative: Spot.isBad(s),
     );
-
     res.setInfo(Spot.isBad(s));
-
     gameRef.addLater(res);
-
   }
 
   @override
@@ -55,4 +47,6 @@ class Manager extends Component with HasGameRef<SpotGame> {
 
 
   }
+
+
 }

@@ -1,22 +1,24 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:tutorial_game/screens/game_play.dart';
+import 'package:tutorial_game/menus/start_game.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+
 
 class MainMenu extends StatelessWidget {
   get https => null;
 
   @override
   Widget build(BuildContext context) {
-    String explain = 'Entdecke in diesem Spiel so viele\nverdächtige '
-        'Hautflecken wie möglich\nund entferne sie durch Antippen!\n'
-        'Du hast dabei 90 Sekunden Zeit.';
+    String explain = 'Entdecken Sie in diesem Spiel so viele\nverdächtige '
+        'Hautflecke wie möglich\nund entfernen Sie diese durch Antippen.\n'
+        'Sie haben dabei 90 Sekunden Zeit!';
 
     TextStyle ts = TextStyle(
         fontFamily: 'OpenSans',
         fontWeight: FontWeight.bold,
-        fontSize: 18.0,
+        fontSize: 17.0,
         color: Colors.black);
 
     TextStyle tsButton = TextStyle(
@@ -24,12 +26,6 @@ class MainMenu extends StatelessWidget {
       fontWeight: FontWeight.bold,
       fontSize: 20.0,
       color: Colors.white,
-      //shadows: <Shadow>[
-      //  Shadow(
-      //    blurRadius: 3.0,
-      //    color: Colors.black,
-      //  ),
-      //],
     );
 
     return Scaffold(
@@ -118,12 +114,6 @@ class MainMenu extends StatelessWidget {
                                     style: ts,
                                   ),
                                   Text(''),
-                                  Text(
-                                    'Bist du bereit?',
-                                    textAlign: TextAlign.center,
-                                    style: ts,
-                                  ),
-                                  Text(''),
                                   Image(
                                     image: AssetImage('assets/images/demo.gif'),
                                     fit: BoxFit.cover,
@@ -138,7 +128,7 @@ class MainMenu extends StatelessWidget {
                               onPressed: () {
                                 Navigator.of(context).pushReplacement(
                                   MaterialPageRoute(
-                                      builder: (context) => GamePlay()),
+                                      builder: (context) => MainGame()),
                                 );
                               },
                               style: ElevatedButton.styleFrom(
@@ -153,7 +143,7 @@ class MainMenu extends StatelessWidget {
                               child: Padding(
                                 padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                                 child: Text(
-                                  'Starte die Entdeckungstour',
+                                  'Entdeckungstour starten',
                                   style: tsButton,
                                 ),
                               ),
@@ -186,13 +176,12 @@ class MainMenu extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    'Oder besuche direkt die Info-App: \n'
+                                    'Oder besuchen Sie direkt die Info-App: \n'
                                     '✔ Wissenswertes über Hautkrebs \n'
                                     '✔ Persönlicher Risikotest \n'
                                     '✔ Präventionsmaßnahmen',
                                     style: ts,
                                   ),
-                                  Text(''),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [

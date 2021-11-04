@@ -1,6 +1,5 @@
 
 import 'dart:math';
-
 import 'package:flame/components/component.dart';
 import 'package:flame/components/mixins/has_game_ref.dart';
 import 'package:flame/components/mixins/tapable.dart';
@@ -14,232 +13,234 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:tutorial_game/game/game.dart';
-import 'package:tutorial_game/game/spot_manager.dart';
+import 'package:tutorial_game/menus/feedbackOverlay.dart';
 
+// Klasse zur Speicherung von Detail-Informationen der Hautflecke
 class SpotData {
-  final double textureWidth;
-  final double textureHeight;
-  final int speed; // Jeder gegner andere Geschwindigkeit
+  final double customWidth;
+  final double customHeight;
+  final int speed; //
   final bool isNegative;
 
   const SpotData({
-    @required this.textureWidth,
-    @required this.textureHeight,
+    @required this.customWidth,
+    @required this.customHeight,
     @required this.speed,
     @required this.isNegative,
   });
 }
 
-class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame>{
+class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame> {
+  // Map zur Speicherung der Sprites und zugehörigen Details
   static final Map<Sprite, SpotData> spotDetails = {
     Sprite('flecken_positive/g1.png'): SpotData(
-      textureWidth: 327,
-      textureHeight: 311,
+      customWidth: 327,
+      customHeight: 311,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g2.png'): SpotData(
-      textureWidth: 221,
-      textureHeight: 215,
+      customWidth: 221,
+      customHeight: 215,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g3.png'): SpotData(
-      textureWidth: 276,
-      textureHeight: 308,
+      customWidth: 276,
+      customHeight: 308,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_negative/f1.png'): SpotData(
-      textureWidth: 311,
-      textureHeight: 361,
+      customWidth: 311,
+      customHeight: 361,
       speed: 200,
       isNegative: true,
     ),
     Sprite('flecken_negative/f2.png'): SpotData(
-      textureWidth: 276,
-      textureHeight: 433,
+      customWidth: 276,
+      customHeight: 433,
       speed: 200,
       isNegative: true,
     ),
     Sprite('flecken_negative/f3.png'): SpotData(
-      textureWidth: 414,
-      textureHeight: 367,
+      customWidth: 414,
+      customHeight: 367,
       speed: 200,
       isNegative: true,
     ),
     Sprite('flecken_negative/f6.png'): SpotData(
-      textureWidth: 366,
-      textureHeight: 270,
+      customWidth: 366,
+      customHeight: 270,
       speed: 200,
       isNegative: true,
     ),
     Sprite('flecken_negative/f7.png'): SpotData(
-      textureWidth: 307,
-      textureHeight: 263,
+      customWidth: 307,
+      customHeight: 263,
       speed: 200,
       isNegative: true,
     ),
     Sprite('flecken_negative/f8.png'): SpotData(
-      textureWidth: 385,
-      textureHeight: 272,
+      customWidth: 385,
+      customHeight: 272,
       speed: 200,
       isNegative: true,
     ),
     Sprite('flecken_positive/g4.png'): SpotData(
-      textureWidth: 201,
-      textureHeight: 210,
+      customWidth: 201,
+      customHeight: 210,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g5.png'): SpotData(
-      textureWidth: 275,
-      textureHeight: 271,
+      customWidth: 275,
+      customHeight: 271,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g7.png'): SpotData(
-      textureWidth: 112,
-      textureHeight: 105,
+      customWidth: 112,
+      customHeight: 105,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g8.png'): SpotData(
-      textureWidth: 311,
-      textureHeight: 327,
+      customWidth: 311,
+      customHeight: 327,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g9.png'): SpotData(
-      textureWidth: 193,
-      textureHeight: 191,
+      customWidth: 193,
+      customHeight: 191,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g10.png'): SpotData(
-      textureWidth: 231,
-      textureHeight: 205,
+      customWidth: 231,
+      customHeight: 205,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g11.png'): SpotData(
-      textureWidth: 228,
-      textureHeight: 219,
+      customWidth: 228,
+      customHeight: 219,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g12.png'): SpotData(
-      textureWidth: 169,
-      textureHeight: 138,
+      customWidth: 169,
+      customHeight: 138,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g13.png'): SpotData(
-      textureWidth: 199,
-      textureHeight: 192,
+      customWidth: 199,
+      customHeight: 192,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g14.png'): SpotData(
-      textureWidth: 201,
-      textureHeight: 205,
+      customWidth: 201,
+      customHeight: 205,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g15.png'): SpotData(
-      textureWidth: 139,
-      textureHeight: 149,
+      customWidth: 139,
+      customHeight: 149,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g16.png'): SpotData(
-      textureWidth: 222,
-      textureHeight: 232,
+      customWidth: 222,
+      customHeight: 232,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g17.png'): SpotData(
-      textureWidth: 242,
-      textureHeight: 206,
+      customWidth: 242,
+      customHeight: 206,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g18.png'): SpotData(
-      textureWidth: 223,
-      textureHeight: 205,
+      customWidth: 223,
+      customHeight: 205,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g19.png'): SpotData(
-      textureWidth: 156,
-      textureHeight: 156,
+      customWidth: 156,
+      customHeight: 156,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g20.png'): SpotData(
-      textureWidth: 213,
-      textureHeight: 201,
+      customWidth: 213,
+      customHeight: 201,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g21.png'): SpotData(
-      textureWidth: 219,
-      textureHeight: 228,
+      customWidth: 219,
+      customHeight: 228,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g22.png'): SpotData(
-      textureWidth: 276,
-      textureHeight: 290,
+      customWidth: 276,
+      customHeight: 290,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g23.png'): SpotData(
-      textureWidth: 201,
-      textureHeight: 213,
+      customWidth: 201,
+      customHeight: 213,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g24.png'): SpotData(
-      textureWidth: 228,
-      textureHeight: 212,
+      customWidth: 228,
+      customHeight: 212,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g25.png'): SpotData(
-      textureWidth: 237,
-      textureHeight: 220,
+      customWidth: 237,
+      customHeight: 220,
       speed: 200,
       isNegative: false,
     ),
     Sprite('flecken_positive/g26.png'): SpotData(
-      textureWidth: 235,
-      textureHeight: 234,
+      customWidth: 235,
+      customHeight: 234,
       speed: 200,
       isNegative: false,
     ),
     // mehr gefährliche
     Sprite('flecken_negative/f16.png'): SpotData(
-      textureWidth: 217,
-      textureHeight: 251,
+      customWidth: 217,
+      customHeight: 251,
       speed: 200,
       isNegative: true,
     ),
     Sprite('flecken_negative/f17.png'): SpotData(
-      textureWidth: 161,
-      textureHeight: 139,
+      customWidth: 161,
+      customHeight: 139,
       speed: 200,
       isNegative: true,
     ),
     Sprite('flecken_negative/f14.png'): SpotData(
-      textureWidth: 169,
-      textureHeight: 138,
+      customWidth: 169,
+      customHeight: 138,
       speed: 200,
       isNegative: true,
     ),
     Sprite('flecken_negative/f11.png'): SpotData(
-      textureWidth: 175,
-      textureHeight: 163,
+      customWidth: 175,
+      customHeight: 163,
       speed: 200,
       isNegative: true,
     ),
@@ -251,10 +252,8 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame>{
   static int previous = 0;
   static int index = 0;
 
-  Manager manager = Manager();
   bool info;
   Timer _timer;
-  Timer _feedbackTimer;
 
   double posX, posY;
   Random random;
@@ -267,12 +266,9 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame>{
     bool isNegative,
   }) : super.fromSprite(width, height, sprite) {
     isNegative = false;
+    //Flame Timer für Feedback-Overlay bei unauffälligen flecken
     _timer = Timer(2, callback: () {
-      gameRef.removeWidgetOverlay('fault2');
-    });
-
-    _feedbackTimer = Timer(2, callback: () {
-      gameRef.removeWidgetOverlay('posFeedback');
+      gameRef.removeWidgetOverlay('feedback');
     });
 
   }
@@ -298,21 +294,18 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame>{
     }
   }
 
-
+  // Setter zum Speichern der Info, ob Fleck pos./neg.
   void setInfo(bool data) {
     this.info = data;
   }
 
-  bool getInfo() {
-    return info;
-  }
-
+  // Getter der Info
   static bool isBad(Sprite s) {
     spotData = spotDetails[s];
     return spotData.isNegative;
   }
 
-
+  // Aktualisierungen pro Frame
   @override
   void update(double t) {
     super.update(t);
@@ -321,10 +314,9 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame>{
     //Spiel wird ab Restzeit 40 Sekunden schneller
     if (gameRef.time <= 40) {
       this.x -= 160 * t;
-      gameRef.parallaxComponent.baseSpeed = Offset(290, 0);
+      gameRef.parallaxBackground.baseSpeed = Offset(290, 0);
     }
     _timer.update(t);
-    _feedbackTimer.update(t);
 
     if (this.x < 0 - this.width && this.info == true) {
       gameRef.markToRemove(this);
@@ -342,7 +334,7 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame>{
   @override
   void resize(Size size) {
     super.resize(size);
-    this.x = size.width + _random.nextInt(300) + _random.nextInt(50);
+    this.x = size.width + _random.nextInt(250) + _random.nextInt(50) + _random.nextInt(50);
     this.y = 100 + _random.nextInt(size.height.toInt() - 200).toDouble();
 
     // Verhinderung von Flecken-Überlappung
@@ -354,6 +346,7 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame>{
     });
   }
 
+  // Random-Werte für den Particle Effekt
   double getRandom() {
     return (_random.nextDouble() - _random.nextDouble());
   }
@@ -387,59 +380,11 @@ class Spot extends SpriteComponent with Tapable, HasGameRef<SpotGame>{
 
     } else if (this.info == false) {
       _timer.start();
-      gameRef.addWidgetOverlay('fault2', _fault()); //_fault()
+      gameRef.addWidgetOverlay('feedback', FeedbackOverlay(
+          x: posX,
+          y: posY)
+      );
     }
-  }
-
-  Widget _fault() {
-    return Positioned(
-        top: posY,
-        left: posX - 200,
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          color: Colors.black.withOpacity(0.5),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 20.0,
-            ),
-            child: Text(
-              'Dieser Fleck ist harmlos!',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22.0,
-              ),
-            ),
-          ),
-        ));
-  }
-
-
-  Widget _posFeedback() {
-    return Positioned(
-        top: posY,
-        left: posX - 200,
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          color: Colors.black.withOpacity(0.5),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 20.0,
-            ),
-            child: Text(
-              'Super! Damit haben Sie das\nHautkrebs-Risiko verringert',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22.0,
-              ),
-            ),
-          ),
-        ));
   }
 
 }

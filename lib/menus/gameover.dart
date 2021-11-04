@@ -1,26 +1,20 @@
-import 'package:flame/components/mixins/has_game_ref.dart';
-import 'package:flame/sprite.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:tutorial_game/game/spots.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import 'main_menu.dart';
 
 class GameOver extends StatelessWidget {
   // Da hier keine Referenz zur Spieloberfläche möglich ist, müssen diese beiden
   // Daten beim Aufruf des Menüs übergeben werden
   final int score;
-  final Function onRestartPressed;
   final bool timeZero;
 
   const GameOver({
     Key key,
     @required this.score,
-    @required this.onRestartPressed,
     @required this.timeZero,
-  })  : assert(onRestartPressed != null),
-        super(key: key);
+  })  : super(key: key);
 
   get https => null;
 
@@ -33,40 +27,41 @@ class GameOver extends StatelessWidget {
     String res2 = 'da zu viele auffällige Hautflecke übersehen wurden. ';
 
 
+    // Individuelle Feedback-Texte
     if (score == 0) {
       resultText =
-          'Du hast außerdem keine verdächtigen Hautflecke erkannt. Hattest du Schwierigkeiten dabei? '
-          'Schaue dir jetzt alles etwas genauer in der Info-App an, oder starte das Spiel erneut! ';
+          'Sie haben außerdem keine verdächtigen Hautflecke erkannt. Hatten Sie Schwierigkeiten dabei? '
+          'Schauen Sie sich jetzt alles etwas genauer in der Info-App an, oder starten Sie das Spiel erneut! ';
     } else if (score == 1) {
       resultText =
-          'Du hast außerdem nur eine verdächtige Hautveränderung entdeckt! Hattest du Schwierigkeiten dabei?'
-          ' Schaue dir jetzt alles etwas genauer in der Info-App an, oder starte das Spiel erneut! ';
+          'Sie haben außerdem nur eine verdächtige Hautveränderung entdeckt! Hatten Sie Schwierigkeiten dabei?'
+          ' Schauen Sie sich jetzt alles etwas genauer in der Info-App an, oder starten Sie das Spiel erneut!  ';
     } else if (score > 1 && score < 5) {
       resultText =
-          'Du hast insgesamt $score verdächtige Hautflecke entdeckt. Gar nicht so schlecht! '
-          ' Schaue dir jetzt die Info-App rund um das Thema Hautkrebs an ';
+          'Sie haben insgesamt $score verdächtige Hautflecke entdeckt. Gar nicht so schlecht! '
+          ' Schauen Sie sich jetzt gerne die Info-App rund um das Thema Hautkrebs an. ';
     } else if (score >= 5) {
-      resultText = 'Du hast insgesamt $score verdächtige Hautflecke entdeckt. Das war sehr gut!'
-          ' Schaue dir jetzt die Info-App rund um das Thema Hautkrebs an. ';
+      resultText = 'Sie haben insgesamt $score verdächtige Hautflecke entdeckt. Das war sehr gut!'
+          ' Schauen Sie sich jetzt gerne die Info-App rund um das Thema Hautkrebs an. ';
     }
 
-
+    // Unterscheidung, ob Spiel bis zum Ende des Timers geschafft, oder ob vorzeitigt beendet wurde.
     if(timeZero == true){
       header = 'Herzlichen Glückwunsch!';
-      resultText = 'Du hast es geschafft und $score verdächtige Hautflecken entdeckt. Das war sehr gut!'
-    ' Schaue dir jetzt die Info-App rund um das Thema Hautkrebs an. ';
+      resultText = 'Sie haben es geschafft und $score verdächtige Hautflecke entdeckt. Das war sehr gut!'
+    ' Schauen Sie sich jetzt gerne die Info-App rund um das Thema Hautkrebs an. ';
     } else if(timeZero == true && score == 0 ){
       header = 'Spiel vorbei'; // Spiel vorbei
     } else if(timeZero == false && score >= 5) {
       header = 'Spiel vorbei...';
       resultText = res2 + 'Du konntest dennoch $score verdächtige Hautveränderungen entdecken. Das war sehr gut!'
-          ' Schaue dir jetzt die Info-App rund um das Thema Hautkrebs an';
-    }else if(timeZero == false && score < 5){
+          ' Schauen Sie sich jetzt gerne die Info-App rund um das Thema Hautkrebs an.';
+    } else if(timeZero == false && score < 5){
       header = 'Spiel vorbei...';
       resultText = res2 + resultText;
     }
 
-
+    // TextStyles für Buttons und Fließtext
     TextStyle ts = TextStyle(
             fontFamily: 'OpenSans',
             fontSize: 22.0,
@@ -77,13 +72,6 @@ class GameOver extends StatelessWidget {
         fontWeight: FontWeight.bold,
         fontSize: 24.0,
         color: Colors.white);
-
-    TextStyle tsHeadertwo = TextStyle(
-        fontFamily: 'OpenSans',
-        fontWeight: FontWeight.bold,
-        fontSize: 18.0,
-        color: Colors.white);
-
 
     return Container(
       width: MediaQuery.of(context).size.width,
@@ -131,7 +119,7 @@ class GameOver extends StatelessWidget {
                     ),
                     Container(
                       width: MediaQuery.of(context).size.width - 150,
-                      height: MediaQuery.of(context).size.height / 3.5,
+                      height: MediaQuery.of(context).size.height / 3.8,
                       padding: EdgeInsets.fromLTRB(15, 15, 15, 15),
                       child: Card(
                         shape: RoundedRectangleBorder(
@@ -141,7 +129,7 @@ class GameOver extends StatelessWidget {
                         child: Column(
                           children: [
                             Text(
-                              'Verdächtige Muttermale, die du übersehen haben könntest:',
+                              'Verdächtige Muttermale, die Sie übersehen haben könnten:',
                               textAlign: TextAlign.center,
                               style: ts,
                             ),
@@ -230,11 +218,11 @@ class GameOver extends StatelessWidget {
                                               builder: (context) => MainMenu()),
                                         );
                                       },
-                                      iconSize: 45,
+                                      iconSize: 40,
                                       icon: Icon(
                                         Icons.replay,
                                         color: Colors.white,
-                                        size: 45.0,
+                                        size: 40.0,
                                       )),
                                 ],
                               ),
@@ -245,8 +233,6 @@ class GameOver extends StatelessWidget {
                         Container(
                           width: MediaQuery.of(context).size.width / 4,
                           height: MediaQuery.of(context).size.height / 6,
-                          //width: 260,
-                          //height: 130,
                           child: Card(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20.0),
@@ -268,11 +254,11 @@ class GameOver extends StatelessWidget {
                                   ),
                                   IconButton(
                                       onPressed: _launchURL,
-                                      iconSize: 45,
+                                      iconSize: 40,
                                       icon: Icon(
                                         Icons.info_outline,
                                         color: Colors.white,
-                                        size: 45.0,
+                                        size: 40.0,
                                       )),
                                 ],
                               ),

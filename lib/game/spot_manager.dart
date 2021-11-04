@@ -13,25 +13,26 @@ class Manager extends Component with HasGameRef<SpotGame> {
   SpotData data;
 
   Manager() : super() {
-    // {this.sprite}
     _timer = Timer(1.0, repeat: true, callback: () {
       spawnRandomSpots();
     });
   }
 
+  // Spawning der Random-Sprites auf dem Bildschirm
   void spawnRandomSpots() {
     s = Spot.getSprite();
     data = Spot.spotData = Spot.spotDetails[s];
     Spot res = Spot(
       sprite: s, // sprite
-      width: data.textureWidth / 3,
-      height: data.textureHeight / 3,
+      width: data.customWidth / 3.5,
+      height: data.customHeight / 3.5,
       isNegative: Spot.isBad(s),
     );
     res.setInfo(Spot.isBad(s));
     gameRef.addLater(res);
   }
 
+  // Timer startet erst, wenn die Manager-Klasse vollständig geladen ist
   @override
   void onMount() {
     super.onMount();
@@ -41,6 +42,7 @@ class Manager extends Component with HasGameRef<SpotGame> {
   @override
   void render(Canvas c) {}
 
+  // Aktualisierungen pro Frame
   @override
   void update(double t) {
     _timer.update(t);

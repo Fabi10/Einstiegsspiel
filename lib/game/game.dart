@@ -1,8 +1,5 @@
 import 'dart:async';
-import 'dart:js';
-import 'dart:math';
 import 'dart:ui';
-import 'package:flame/components/component.dart';
 import 'package:flame/components/mixins/tapable.dart';
 import 'package:flame/components/parallax_component.dart';
 import 'package:flame/components/text_component.dart';
@@ -14,17 +11,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tutorial_game/game/spot_manager.dart';
 import 'package:tutorial_game/game/spots.dart';
-import 'package:tutorial_game/screens/gameover_menu.dart';
-import 'package:tutorial_game/screens/main_menu.dart';
+import 'package:tutorial_game/menus/gameover.dart';
+
+
 import 'package:url_launcher/url_launcher.dart';
 
 
 class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
 
-  SpriteComponent detector;
-
   // Fortlaufender 3D Effekt Hintergrund
-  ParallaxComponent parallaxComponent;
+  ParallaxComponent parallaxBackground;
 
   // Timer-Anzeige
   TextComponent _timeDisplay;
@@ -32,40 +28,36 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
   int time = 90;
 
   // Punkte-Anzeige
-  TextComponent name;
-  TextComponent _scoreText;
+  TextComponent _scoreDisplay;
   int score;
 
-  Random _random;
   Manager m;
 
-  // Leben
+  // Lebenspunkte
   ValueNotifier<int> lifePoints;
+
   bool _isActive;
   bool timeZero;
 
   // ==================================================
 
-  // = =======================================
 
   SpotGame() {
     lifePoints = ValueNotifier(3);
 
     // Hauthintergund - 2 Bilder übereinander
-    parallaxComponent = ParallaxComponent([
+    parallaxBackground = ParallaxComponent([
       ParallaxImage('background.png'),
       ParallaxImage('layer.png'),
     ],
         // Geschwindigkeit in x- und y-Richtung
         baseSpeed: Offset(130, 0)
     );
-    //layerDelta: Offset(20, 0));
 
-    add(parallaxComponent);
-
+    add(parallaxBackground);
 
     score = 0;
-    _scoreText = TextComponent("Punkte: $score ", //+ score.toString()
+    _scoreDisplay = TextComponent("Punkte: $score ", //+ score.toString()
         config: TextConfig(
           fontFamily: 'VT323',
           color: Colors.black,
@@ -80,15 +72,12 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
         ));
 
     add(_timeDisplay);
-    add(_scoreText);
+    add(_scoreDisplay);
 
-    // Weiteres Widget anzeigen lassen
+    // Header-Anzeige als WidgetOverlay
     addWidgetOverlay('headerDisplay', _buildHeader());
 
     startTimer(time);
-
-
-    _random = Random();
 
     // ==================================================
 
@@ -115,14 +104,15 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
         Position(((size.width / 2) - (_timeDisplay.width * 4)), 15));
 
     // NEU
-    _scoreText.setByPosition(Position(((size.width / 2)), 22));
+    _scoreDisplay.setByPosition(Position(((size.width / 2)), 22));
   }
 
+  // Aktualisierungen pro Frame
   @override
   void update(double t) {
     super.update(t);
     _timeDisplay.text = '$time';
-    _scoreText.text = "Punkte: $score";
+    _scoreDisplay.text = "Punkte: $score";
 
     // Gameover bei Lebenspunkte = 0
     if (lifePoints.value == 0) {
@@ -130,7 +120,6 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
     }
 
   }
-
 
   // Timer startet von 90 Sekunden
   void startTimer(int value) {
@@ -153,18 +142,18 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
       case AppLifecycleState.resumed:
         break;
       case AppLifecycleState.inactive:
-        this.pauseGame();
+        this.pausing();
         break;
       case AppLifecycleState.paused:
-        this.pauseGame();
+        this.pausing();
         break;
       case AppLifecycleState.detached:
-        this.pauseGame();
+        this.pausing();
         break;
     }
   }
 
-  // Header mit Pause Button und Lebenspunkte
+  // Header
   Widget _buildHeader() {
     return Card(
       //shape: RoundedRectangleBorder(
@@ -186,7 +175,7 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
                     onPressed: () {
                        //Aufruf Pause Bildschirm
                       if(_isActive == true){
-                        pauseGame();
+                        pausing();
                       } else if(_isActive == false) {
                         null;
                       }
@@ -198,10 +187,10 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
                     ),
                     iconSize: 50.0 ,
                   ),
-
                   //Lebenspunkte
                   ValueListenableBuilder(
                     valueListenable: this.lifePoints, //ValueNotifier
+                    // builder baut das Widget -> Liste von Herz-Icons
                     builder: (BuildContext context, value, Widget child) {
                       List<Widget> list = <Widget>[];
                       for (int i = 0; i < 3; ++i) {
@@ -225,18 +214,18 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
 
   }
 
-  void pauseGame() {
+  // Spiel pausieren
+  void pausing() {
     pauseEngine();
     if (_timer.isActive) {
       _timer.cancel();
     }
-    // Pause-Bildschirm Widget
     removeWidgetOverlay('fault2');
-    removeWidgetOverlay('posFeedback');
-    addWidgetOverlay('PauseMenu', _buildPauseMenu());
+    addWidgetOverlay('PauseMenu', _pauseMenuBuilder());
   }
 
-  Widget _buildPauseMenu() {
+  // Pausenmenü Widget
+  Widget _pauseMenuBuilder() {
     return Center(
       child: Card(
         shape: RoundedRectangleBorder(
@@ -281,7 +270,7 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
                   ),
                   IconButton(
                     onPressed: () {
-                      resumeGame();
+                      resuming();
                     },
                     iconSize: 50.0,
                     icon: Icon(
@@ -322,7 +311,7 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
     );
   }
 
-  void resumeGame() {
+  void resuming() {
     removeWidgetOverlay('PauseMenu');
     resumeEngine();
     if (!_timer.isActive) {
@@ -331,18 +320,19 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
     }
   }
 
-  void gameOver() {
+  // Aufruf Game Over Menü
+ void gameOver() {
     pauseEngine();
     _isActive = false;
     _timer.cancel();
     addWidgetOverlay('GameoverMenu', GameOver(
         score: score,
-        onRestartPressed: reset,
         timeZero: timeZero)
-    ); //_gameoverMenu()
+    );
 
   }
 
+  // Hyperlink zur Info-App
   void _launchURL() async {
     await canLaunch('https://lab.ise.uni-luebeck.de/tabiri/#/home')
         ? await launch('https://lab.ise.uni-luebeck.de/tabiri/#/home')
@@ -350,8 +340,11 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
   }
 
 
-  // NEUSTART
-  void reset() {
+  // Spieldaten zurücksetzen für direkten Neustart vom Game-Over-Menü aus
+  // Wird in der aktutellen Version jedoch nicht gebraucht, da man immer wieder zum Hauptmenü
+  // zurück navigiert und durch "Start" alle Spieldaten im Konstruktor der SpotGame-Klasse neu initialisiert werden
+  // Evt. für Erweiterungen
+  void resetGame() {
     this.score = 0;
 
     // Neustart Zeit-Timer
@@ -362,14 +355,16 @@ class SpotGame extends BaseGame with HasTapableComponents, HasWidgetsOverlay {
     this.lifePoints.value = 3;
     timeZero = false;
 
-    // Flecken löschen
+    // Restliche Flecken auf dem Bildschirm löschen
     components.whereType<Spot>().forEach((spot) {
       this.markToRemove(spot);
     });
 
-    parallaxComponent.baseSpeed = Offset(130, 0);
+    // Geschwindigkeit zurücksetzen
+    parallaxBackground.baseSpeed = Offset(130, 0);
+
+    // Overlays entfernen
     removeWidgetOverlay('fault2');
-    removeWidgetOverlay('posFeedback');
     removeWidgetOverlay('GameoverMenu');
 
     resumeEngine();

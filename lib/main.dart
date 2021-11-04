@@ -1,8 +1,8 @@
 
 import 'package:flame/flame.dart';
 import 'package:flutter/material.dart';
-import 'package:tutorial_game/game/game.dart';
-import 'package:tutorial_game/screens/main_menu.dart';
+import 'package:tutorial_game/menus/main_menu.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Spot Run',
+      title: 'Einstiegsspiel',
       theme: ThemeData(
         fontFamily: 'VT323',
         primarySwatch: Colors.blue,
@@ -26,31 +26,3 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
-// FÄLLT WEG
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
- SpotGame game;
-
- @override
-  void initState() {
-    super.initState();
-    game = SpotGame();
-
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: game.widget,
-    );
-  }
-}

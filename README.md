@@ -1,9 +1,9 @@
 # Einstiegsspiel
 
 Dieses Projekt war meine Bachelor-Abschlussarbeit.
-Ein Serious Game im Kontext Hautkrebsprävention
+Ein Serious Game im Kontext Hautkrebsprävention mit geringer Komplexität 
 
-Entwickelt mit Flutter und Dart
+Technologien: Flutter und Dart
 https://docs.flutter.dev/
 https://dart.dev/
 
